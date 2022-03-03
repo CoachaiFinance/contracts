@@ -7,9 +7,9 @@ import "../libraries/SafeERC20.sol";
 import "../interfaces/ITreasury.sol";
 import "../interfaces/IERC20.sol";
 import "../interfaces/IUniswapV2Router.sol";
-import "../interfaces/IOlympusAuthority.sol";
+import "../interfaces/ICoachAIAuthority.sol";
 
-import "../types/OlympusAccessControlled.sol";
+import "../types/CoachAIAccessControlled.sol";
 
 interface IBalancerVault {
     /**
@@ -59,88 +59,88 @@ interface IBalancerVault {
     }
 }
 
-contract BalancerLiquidityMigrator is OlympusAccessControlled {
+contract BalancerLiquidityMigrator is CoachAIAccessControlled {
     using SafeERC20 for IERC20;
 
     // Balancer Vault
     IBalancerVault internal immutable balancerVault = IBalancerVault(0xBA12222222228d8Ba445958a75a0704d566BF2C8);
 
-    // Olympus Treasury
+    // CoachAI Treasury
     ITreasury internal immutable treasury = ITreasury(0x9A315BdF513367C0377FB36545857d12e85813Ef);
 
     // Sushiswap Router
     IUniswapV2Router internal immutable router = IUniswapV2Router(0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F);
 
-    // Balancer 50OHM-25DAI-25WETH poolID
+    // Balancer 50CADT-25DAI-25WETH poolID
     bytes32 internal immutable balancerPoolID = 0xc45d42f801105e861e86658648e3678ad7aa70f900010000000000000000011e;
 
-    address internal immutable OHMETHSLP = 0x69b81152c5A8d35A67B32A4D3772795d96CaE4da;
-    address internal immutable OHMDAISLP = 0x055475920a8c93CfFb64d039A8205F7AcC7722d3;
-    address internal immutable OHM = 0x64aa3364F17a4D01c6f1751Fd97C2BD3D7e7f1D5;
+    address internal immutable CADTETHSLP = 0x69b81152c5A8d35A67B32A4D3772795d96CaE4da;
+    address internal immutable CADTDAISLP = 0x055475920a8c93CfFb64d039A8205F7AcC7722d3;
+    address internal immutable CADT = 0x64aa3364F17a4D01c6f1751Fd97C2BD3D7e7f1D5;
     address internal immutable WETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
     address internal immutable DAI = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
 
-    constructor(IOlympusAuthority _authority) OlympusAccessControlled(_authority) {}
+    constructor(ICoachAIAuthority _authority) CoachAIAccessControlled(_authority) {}
 
     /**
-     * @notice Removes liquidity from OHM/ETH SLP and OHM/DAI SLP, then adds liquidty to
-     * 50OHM-25DAI-25WETH Balancer pool.
+     * @notice Removes liquidity from CADT/ETH SLP and CADT/DAI SLP, then adds liquidty to
+     * 50CADT-25DAI-25WETH Balancer pool.
      */
     function moveLiquidity(
-        uint256 _amountOHMETH,
-        uint256 _amountOHMDAI,
-        uint256[2] memory _minOHMETH,
-        uint256[2] memory _minOHMDAI,
+        uint256 _amountCADTETH,
+        uint256 _amountCADTDAI,
+        uint256[2] memory _minCADTETH,
+        uint256[2] memory _minCADTDAI,
         uint256 _deadline,
         bytes memory _userData
     ) external onlyGuardian {
         // Manage LPs from treasury
-        treasury.manage(OHMETHSLP, _amountOHMETH);
-        treasury.manage(OHMDAISLP, _amountOHMDAI);
+        treasury.manage(CADTETHSLP, _amountCADTETH);
+        treasury.manage(CADTDAISLP, _amountCADTDAI);
 
         // Approve LPs to be spent by the Sushiswap router
-        IERC20(OHMETHSLP).approve(address(router), _amountOHMETH);
-        IERC20(OHMDAISLP).approve(address(router), _amountOHMDAI);
+        IERC20(CADTETHSLP).approve(address(router), _amountCADTETH);
+        IERC20(CADTDAISLP).approve(address(router), _amountCADTDAI);
 
-        // Remove specified liquidity from OHM/ETH SLP
-        (uint256 amountETH, uint256 amountOHM1) = router.removeLiquidity(
+        // Remove specified liquidity from CADT/ETH SLP
+        (uint256 amountETH, uint256 amountCADT1) = router.removeLiquidity(
             WETH,
-            OHM,
-            _amountOHMETH,
-            _minOHMETH[0],
-            _minOHMETH[1],
+            CADT,
+            _amountCADTETH,
+            _minCADTETH[0],
+            _minCADTETH[1],
             address(this),
             _deadline
         );
 
-        // Remove specified liquidity from OHM/DAI SLP
-        (uint256 amountDAI, uint256 amountOHM2) = router.removeLiquidity(
+        // Remove specified liquidity from CADT/DAI SLP
+        (uint256 amountDAI, uint256 amountCADT2) = router.removeLiquidity(
             DAI,
-            OHM,
-            _amountOHMDAI,
-            _minOHMDAI[0],
-            _minOHMDAI[1],
+            CADT,
+            _amountCADTDAI,
+            _minCADTDAI[0],
+            _minCADTDAI[1],
             address(this),
             _deadline
         );
 
-        // Amount of OHM removed from liquidity
-        uint256 amountOHM = amountOHM1 + amountOHM2;
+        // Amount of CADT removed from liquidity
+        uint256 amountCADT = amountCADT1 + amountCADT2;
 
         // Approve Balancer vault to spend tokens
-        IERC20(OHM).approve(address(balancerVault), amountOHM);
+        IERC20(CADT).approve(address(balancerVault), amountCADT);
         IERC20(WETH).approve(address(balancerVault), amountETH);
         IERC20(DAI).approve(address(balancerVault), amountDAI);
 
         // Array of tokens that liquidty will be added for
         address[] memory tokens = new address[](3);
-        tokens[0] = OHM;
+        tokens[0] = CADT;
         tokens[1] = DAI;
         tokens[2] = WETH;
 
         // Max amount of each token that liquidity will be added for
         uint256[] memory amounts = new uint256[](3);
-        amounts[0] = amountOHM;
+        amounts[0] = amountCADT;
         amounts[1] = amountDAI;
         amounts[2] = amountETH;
 
@@ -155,8 +155,8 @@ contract BalancerLiquidityMigrator is OlympusAccessControlled {
         // Add liquidity to the Balancer pool
         balancerVault.joinPool(balancerPoolID, address(this), address(treasury), poolRequest);
 
-        // Send any leftover OHM back to guardian and WETH and DAI to treasury
-        IERC20(OHM).safeTransfer(authority.guardian(), amountOHM);
+        // Send any leftover CADT back to guardian and WETH and DAI to treasury
+        IERC20(CADT).safeTransfer(authority.guardian(), amountCADT);
         IERC20(WETH).safeTransfer(address(treasury), amountETH);
         IERC20(DAI).safeTransfer(address(treasury), amountDAI);
     }

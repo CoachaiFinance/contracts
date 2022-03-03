@@ -9,30 +9,30 @@ import "../libraries/SafeERC20.sol";
 contract CrossChainMigrator is Ownable {
     using SafeERC20 for IERC20;
 
-    IERC20 internal immutable wsOHM; // v1 token
-    IERC20 internal immutable gOHM; // v2 token
+    IERC20 internal immutable wsCADT; // v1 token
+    IERC20 internal immutable gCADT; // v2 token
 
-    constructor(address _wsOHM, address _gOHM) {
-        require(_wsOHM != address(0), "Zero address: wsOHM");
-        wsOHM = IERC20(_wsOHM);
-        require(_gOHM != address(0), "Zero address: gOHM");
-        gOHM = IERC20(_gOHM);
+    constructor(address _wsCADT, address _gCADT) {
+        require(_wsCADT != address(0), "Zero address: wsCADT");
+        wsCADT = IERC20(_wsCADT);
+        require(_gCADT != address(0), "Zero address: gCADT");
+        gCADT = IERC20(_gCADT);
     }
 
-    // migrate wsOHM to gOHM - 1:1 like kind
+    // migrate wsCADT to gCADT - 1:1 like kind
     function migrate(uint256 amount) external {
-        wsOHM.safeTransferFrom(msg.sender, address(this), amount);
-        gOHM.safeTransfer(msg.sender, amount);
+        wsCADT.safeTransferFrom(msg.sender, address(this), amount);
+        gCADT.safeTransfer(msg.sender, amount);
     }
 
-    // withdraw wsOHM so it can be bridged on ETH and returned as more gOHM
+    // withdraw wsCADT so it can be bridged on ETH and returned as more gCADT
     function replenish() external onlyOwner {
-        wsOHM.safeTransfer(msg.sender, wsOHM.balanceOf(address(this)));
+        wsCADT.safeTransfer(msg.sender, wsCADT.balanceOf(address(this)));
     }
 
-    // withdraw migrated wsOHM and unmigrated gOHM
+    // withdraw migrated wsCADT and unmigrated gCADT
     function clear() external onlyOwner {
-        wsOHM.safeTransfer(msg.sender, wsOHM.balanceOf(address(this)));
-        gOHM.safeTransfer(msg.sender, gOHM.balanceOf(address(this)));
+        wsCADT.safeTransfer(msg.sender, wsCADT.balanceOf(address(this)));
+        gCADT.safeTransfer(msg.sender, gCADT.balanceOf(address(this)));
     }
 }

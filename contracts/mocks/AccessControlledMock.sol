@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: Unlicensed
 pragma solidity 0.7.5;
 
-import "../types/OlympusAccessControlled.sol";
+import "../types/CoachAIAccessControlled.sol";
 
-contract AccessControlledMock is OlympusAccessControlled {
-    constructor(address _auth) OlympusAccessControlled(IOlympusAuthority(_auth)) {}
+contract AccessControlledMock is CoachAIAccessControlled {
+    constructor(address _auth) CoachAIAccessControlled(ICoachAIAuthority(_auth)) {}
 
     bool public governorOnlyTest;
 
