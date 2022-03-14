@@ -22,7 +22,7 @@ contract CoachAIBondDepositoryV2 is IBondDepository, NoteKeeper {
     event CreateMarket(uint256 indexed id, address indexed baseToken, address indexed quoteToken, uint256 initialPrice);
     event CloseMarket(uint256 indexed id);
     event Bond(uint256 indexed id, uint256 amount, uint256 price);
-    event Tuned(uint256 indexed id, uint64 oldControlVariable, uint64 newControlVariable);
+    event Tuned(uint256 indexed id, uint128 oldControlVariable, uint128 newControlVariable);
 
     /* ======== STATE VARIABLES ======== */
 
@@ -100,9 +100,9 @@ contract CoachAIBondDepositoryV2 is IBondDepository, NoteKeeper {
          * amount = quote tokens in
          * price = quote tokens : cadt (i.e. 42069 DAI : CADT)
          *
-         * 1e18 = CADT decimals (9) + price decimals (9)
+         * 1e36 = CADT decimals (18) + price decimals (18)
          */
-        payout_ = ((_amount * 1e18) / price) / (10**metadata[_id].quoteDecimals);
+        payout_ = ((_amount * 1e36) / price) / (10**metadata[_id].quoteDecimals);
 
         // markets have a max payout amount, capping size because deposits
         // do not experience slippage. max payout is recalculated upon tuning
@@ -139,10 +139,10 @@ contract CoachAIBondDepositoryV2 is IBondDepository, NoteKeeper {
         // markets keep track of how many quote tokens have been
         // purchased, and how much CADT has been sold
         market.purchased += _amount;
-        market.sold += uint64(payout_);
+        market.sold += uint128(payout_);
 
         // incrementing total debt raises the price of the next bond
-        market.totalDebt += uint64(payout_);
+        market.totalDebt += uint128(payout_);
 
         emit Bond(_id, _amount, price);
 
@@ -200,7 +200,7 @@ contract CoachAIBondDepositoryV2 is IBondDepository, NoteKeeper {
         if (adjustments[_id].active) {
             Adjustment storage adjustment = adjustments[_id];
 
-            (uint64 adjustBy, uint48 secondsSince, bool stillActive) = _controlDecay(_id);
+            (uint128 adjustBy, uint48 secondsSince, bool stillActive) = _controlDecay(_id);
             terms[_id].controlVariable -= adjustBy;
 
             if (stillActive) {
@@ -229,9 +229,9 @@ contract CoachAIBondDepositoryV2 is IBondDepository, NoteKeeper {
             uint256 price = _marketPrice(_id);
 
             // standardize capacity into an base token amount
-            // cadt decimals (9) + price decimals (9)
+            // cadt decimals (18) + price decimals (18)
             uint256 capacity = market.capacityInQuote
-                ? ((market.capacity * 1e18) / price) / (10**meta.quoteDecimals)
+                ? ((market.capacity * 1e36) / price) / (10**meta.quoteDecimals)
                 : market.capacity;
 
             /**
@@ -241,13 +241,13 @@ contract CoachAIBondDepositoryV2 is IBondDepository, NoteKeeper {
              * i.e. market has 10 days remaining. deposit interval is 1 day. capacity
              * is 10,000 CADT. max payout would be 1,000 CADT (10,000 * 1 / 10).
              */
-            markets[_id].maxPayout = uint64((capacity * meta.depositInterval) / timeRemaining);
+            markets[_id].maxPayout = uint128((capacity * meta.depositInterval) / timeRemaining);
 
             // calculate the ideal total debt to satisfy capacity in the remaining time
             uint256 targetDebt = (capacity * meta.length) / timeRemaining;
 
             // derive a new control variable from the target debt and current supply
-            uint64 newControlVariable = uint64((price * treasury.baseSupply()) / targetDebt);
+            uint128 newControlVariable = uint128((price * treasury.baseSupply()) / targetDebt);
 
             emit Tuned(_id, terms[_id].controlVariable, newControlVariable);
 
@@ -256,7 +256,7 @@ contract CoachAIBondDepositoryV2 is IBondDepository, NoteKeeper {
             } else {
                 // if decrease, control variable change will be carried out over the tune interval
                 // this is because price will be lowered
-                uint64 change = terms[_id].controlVariable - newControlVariable;
+                uint128 change = terms[_id].controlVariable - newControlVariable;
                 adjustments[_id] = Adjustment(change, _time, meta.tuneInterval, true);
             }
             metadata[_id].lastTune = _time;
@@ -267,9 +267,9 @@ contract CoachAIBondDepositoryV2 is IBondDepository, NoteKeeper {
 
     /**
      * @notice             creates a new market type
-     * @dev                current price should be in 9 decimals.
+     * @dev                current price should be in 18 decimals.
      * @param _quoteToken  token used to deposit
-     * @param _market      [capacity (in CADT or quote), initial price / CADT (9 decimals), debt buffer (3 decimals)]
+     * @param _market      [capacity (in CADT or quote), initial price / CADT (18 decimals), debt buffer (3 decimals)]
      * @param _booleans    [capacity in quote, fixed term]
      * @param _terms       [vesting length (if fixed term) or vested timestamp, conclusion timestamp]
      * @param _intervals   [deposit interval (seconds), tune interval (seconds)]
@@ -293,16 +293,16 @@ contract CoachAIBondDepositoryV2 is IBondDepository, NoteKeeper {
          * that will decay over in the length of the program if price remains the same).
          * it is converted into base token terms if passed in in quote token terms.
          *
-         * 1e18 = cadt decimals (9) + initial price decimals (9)
+         * 1e36 = cadt decimals (18) + initial price decimals (18)
          */
-        uint64 targetDebt = uint64(_booleans[0] ? ((_market[0] * 1e18) / _market[1]) / 10**decimals : _market[0]);
+        uint128 targetDebt = uint128(_booleans[0] ? ((_market[0] * 1e36) / _market[1]) / 10**decimals : _market[0]);
 
         /*
          * max payout is the amount of capacity that should be utilized in a deposit
          * interval. for example, if capacity is 1,000 CADT, there are 10 days to conclusion,
          * and the preferred deposit interval is 1 day, max payout would be 100 CADT.
          */
-        uint64 maxPayout = uint64((targetDebt * _intervals[0]) / secondsToConclusion);
+        uint128 maxPayout = uint128((targetDebt * _intervals[0]) / secondsToConclusion);
 
         /*
          * max debt serves as a circuit breaker for the market. let's say the quote
@@ -343,10 +343,10 @@ contract CoachAIBondDepositoryV2 is IBondDepository, NoteKeeper {
         terms.push(
             Terms({
                 fixedTerm: _booleans[1],
-                controlVariable: uint64(controlVariable),
+                controlVariable: uint128(controlVariable),
                 vesting: uint48(_terms[0]),
                 conclusion: uint48(_terms[1]),
-                maxDebt: uint64(maxDebt)
+                maxDebt: uint128(maxDebt)
             })
         );
 
@@ -416,11 +416,11 @@ contract CoachAIBondDepositoryV2 is IBondDepository, NoteKeeper {
      * @param _id          ID of market
      * @return             amount of CADT to be paid in CADT decimals
      *
-     * @dev 1e18 = cadt decimals (9) + market price decimals (9)
+     * @dev 1e36 = cadt decimals (18) + market price decimals (18)
      */
     function payoutFor(uint256 _amount, uint256 _id) external view override returns (uint256) {
         Metadata memory meta = metadata[_id];
-        return (_amount * 1e18) / marketPrice(_id) / 10**meta.quoteDecimals;
+        return (_amount * 1e36) / marketPrice(_id) / 10**meta.quoteDecimals;
     }
 
     /**
@@ -448,12 +448,12 @@ contract CoachAIBondDepositoryV2 is IBondDepository, NoteKeeper {
      * @param _id          ID of market
      * @return             amount of debt to decay
      */
-    function debtDecay(uint256 _id) public view override returns (uint64) {
+    function debtDecay(uint256 _id) public view override returns (uint128) {
         Metadata memory meta = metadata[_id];
 
         uint256 secondsSince = block.timestamp - meta.lastDecay;
 
-        return uint64((markets[_id].totalDebt * secondsSince) / meta.length);
+        return uint128((markets[_id].totalDebt * secondsSince) / meta.length);
     }
 
     /**
@@ -463,7 +463,7 @@ contract CoachAIBondDepositoryV2 is IBondDepository, NoteKeeper {
      * @return             control variable for market in CADT decimals
      */
     function currentControlVariable(uint256 _id) public view returns (uint256) {
-        (uint64 decay, , ) = _controlDecay(_id);
+        (uint128 decay, , ) = _controlDecay(_id);
         return terms[_id].controlVariable - decay;
     }
 
@@ -553,7 +553,7 @@ contract CoachAIBondDepositoryV2 is IBondDepository, NoteKeeper {
         internal
         view
         returns (
-            uint64 decay_,
+            uint128 decay_,
             uint48 secondsSince_,
             bool active_
         )

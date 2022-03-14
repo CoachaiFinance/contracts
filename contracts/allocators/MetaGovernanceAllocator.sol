@@ -23,7 +23,7 @@ contract MetaGovernanceAllocator is CoachAIAccessControlled {
     using SafeERC20 for IERC20;
 
     /// @notice CoachAI Treasury
-    ITreasury internal treasury = ITreasury(0x9A315BdF513367C0377FB36545857d12e85813Ef);
+    ITreasury internal treasury = ITreasury(0x991FC88ECDD57a207454ffF86368A3A2549aE770);
     /// @notice BTRFLY token address
     address internal immutable BTRFLY = 0xC0d4Ceb216B3BA9C3701B291766fDCbA977ceC3A;
     /// @notice Staked BTRFLY token address

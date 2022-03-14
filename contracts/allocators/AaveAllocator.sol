@@ -70,7 +70,7 @@ contract AaveAllocator is CoachAIAccessControlled {
     // Aave Lending Pool
     ILendingPool internal immutable lendingPool = ILendingPool(0x7d2768dE32b0b80b7a3454c06BdAc94A69DDc7A9);
     // CoachAI Treasury
-    ITreasury internal immutable treasury = ITreasury(0x9A315BdF513367C0377FB36545857d12e85813Ef);
+    ITreasury internal immutable treasury = ITreasury(0x991FC88ECDD57a207454ffF86368A3A2549aE770);
 
     // all relevant aTokens
     address[] public aTokens;

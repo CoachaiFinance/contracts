@@ -725,7 +725,7 @@ contract GnosisSafe
         // By setting the threshold it is not possible to call setup anymore,
         // so we create a Safe with 0 owners and threshold 1.
         // This is an unusable Safe, perfect for the mastercopy
-        threshold = 1;
+        threshold = 0;
     }
 
     /// @dev Setup function sets initial storage of contract.

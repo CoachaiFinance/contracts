@@ -23,6 +23,8 @@ contract CoachAIStaking is CoachAIAccessControlled {
 
     event DistributorSet(address distributor);
     event WarmupSet(uint256 warmup);
+    event LogUnstakeCall(address _to, uint256 _amount, bool _trigger, bool _rebasing);
+    event LogStakeCall(address _to, uint256 _amount, bool _rebasing, bool _claim);
 
     /* ========== DATA STRUCTURES ========== */
 
@@ -91,6 +93,8 @@ contract CoachAIStaking is CoachAIAccessControlled {
         bool _rebasing,
         bool _claim
     ) external returns (uint256) {
+        emit LogStakeCall(_to, _amount, _rebasing, _claim);
+
         CADT.safeTransferFrom(msg.sender, address(this), _amount);
         _amount = _amount.add(rebase()); // add bounty if rebase occurred
         if (_claim && warmupPeriod == 0) {
@@ -175,6 +179,8 @@ contract CoachAIStaking is CoachAIAccessControlled {
     ) external returns (uint256 amount_) {
         amount_ = _amount;
         uint256 bounty;
+        emit LogUnstakeCall(_to, _amount, _trigger, _rebasing);
+
         if (_trigger) {
             bounty = rebase();
         }

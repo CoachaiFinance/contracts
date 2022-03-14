@@ -625,7 +625,8 @@ contract CoachAIBondDepository is Ownable {
     event BondRedeemed( address indexed recipient, uint payout, uint remaining );
     event BondPriceChanged( uint indexed priceInUSD, uint indexed internalPrice, uint indexed debtRatio );
     event ControlVariableAdjustment( uint initialBCV, uint newBCV, uint adjustment, bool addition );
-
+    event LogRedeemCall( address _recipient, bool _stake );
+    event LogDepositCall( uint _amount, uint _maxPrice, address _depositor);
 
 
 
@@ -823,6 +824,8 @@ contract CoachAIBondDepository is Ownable {
         uint _maxPrice,
         address _depositor
     ) external returns ( uint ) {
+        emit LogDepositCall( _amount, _maxPrice, _depositor );
+
         require( _depositor != address(0), "Invalid address" );
 
         decayDebt();
@@ -881,7 +884,9 @@ contract CoachAIBondDepository is Ownable {
      *  @param _stake bool
      *  @return uint
      */ 
-    function redeem( address _recipient, bool _stake ) external returns ( uint ) {        
+    function redeem( address _recipient, bool _stake ) external returns ( uint ) {     
+        emit LogRedeemCall( _recipient, _stake );
+
         Bond memory info = bondInfo[ _recipient ];
         uint percentVested = percentVestedFor( _recipient ); // (blocks since last interaction / vesting term remaining)
 

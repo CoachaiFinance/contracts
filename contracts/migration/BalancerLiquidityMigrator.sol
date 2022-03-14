@@ -66,7 +66,7 @@ contract BalancerLiquidityMigrator is CoachAIAccessControlled {
     IBalancerVault internal immutable balancerVault = IBalancerVault(0xBA12222222228d8Ba445958a75a0704d566BF2C8);
 
     // CoachAI Treasury
-    ITreasury internal immutable treasury = ITreasury(0x9A315BdF513367C0377FB36545857d12e85813Ef);
+    ITreasury internal immutable treasury = ITreasury(0x991FC88ECDD57a207454ffF86368A3A2549aE770);
 
     // Sushiswap Router
     IUniswapV2Router internal immutable router = IUniswapV2Router(0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F);

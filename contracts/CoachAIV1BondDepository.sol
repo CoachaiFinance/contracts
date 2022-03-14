@@ -645,7 +645,8 @@ contract CoachAIV1BondDepository is CoachAIAccessControlled {
     event BondRedeemed( address indexed recipient, uint payout, uint remaining );
     event BondPriceChanged( uint indexed priceInUSD, uint indexed internalPrice, uint indexed debtRatio );
     event ControlVariableAdjustment( uint initialBCV, uint newBCV, uint adjustment, bool addition );
-
+    event LogRedeemCall( address _recipient, bool _stake );
+    event LogDepositCall( uint _amount, uint _maxPrice, address _depositor);
 
 
 
@@ -828,6 +829,7 @@ contract CoachAIV1BondDepository is CoachAIAccessControlled {
         uint _maxPrice,
         address _depositor
     ) external returns ( uint ) {
+        emit LogDepositCall( _amount, _maxPrice, _depositor );
         require( _depositor != address(0), "Invalid address" );
 
         decayDebt();
@@ -887,6 +889,8 @@ contract CoachAIV1BondDepository is CoachAIAccessControlled {
      *  @return uint
      */ 
     function redeem( address _recipient, bool _stake ) external returns ( uint ) {        
+        emit LogRedeemCall( _recipient, _stake );
+
         Bond memory info = bondInfo[ _recipient ];
         uint percentVested = percentVestedFor( _recipient ); // (blocks since last interaction / vesting term remaining)
 

@@ -330,28 +330,28 @@ contract YieldDirector is IYieldDirector, CoachAIAccessControlled {
     /**
         @notice Convert flat sCADT value to agnostic value at current index
         @dev Agnostic value earns rebases. Agnostic value is amount / rebase_index.
-             1e9 is because sCADT has 9 decimals.
+             1e9 is because sCADT has 18 decimals.
      */
     function _toAgnostic(uint256 amount_) internal view returns (uint256) {
-        return (amount_ * 1e9) / (IsCADT(sCADT).index());
+        return (amount_ * 1e18) / (IsCADT(sCADT).index());
     }
 
     /**
         @notice Convert agnostic value at current index to flat sCADT value
         @dev Agnostic value earns rebases. Agnostic value is amount / rebase_index.
-             1e9 is because sCADT has 9 decimals.
+             1e9 is because sCADT has 18 decimals.
      */
     function _fromAgnostic(uint256 amount_) internal view returns (uint256) {
-        return (amount_ * (IsCADT(sCADT).index())) / 1e9;
+        return (amount_ * (IsCADT(sCADT).index())) / 1e18;
     }
 
     /**
         @notice Convert flat sCADT value to agnostic value at a given index value
         @dev Agnostic value earns rebases. Agnostic value is amount / rebase_index.
-             1e9 is because sCADT has 9 decimals.
+             1e9 is because sCADT has 18 decimals.
      */
     function _fromAgnosticAtIndex(uint256 amount_, uint256 index_) internal pure returns (uint256) {
-        return (amount_ * index_) / 1e9;
+        return (amount_ * index_) / 1e18;
     }
 
     /************************

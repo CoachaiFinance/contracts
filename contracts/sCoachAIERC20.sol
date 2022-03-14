@@ -20,6 +20,7 @@ contract sCoachAI is IsCADT, ERC20Permit {
     event LogSupply(uint256 indexed epoch, uint256 totalSupply);
     event LogRebase(uint256 indexed epoch, uint256 rebase, uint256 index);
     event LogStakingContractUpdated(address stakingContract);
+    event LogRebaseCall(uint256 profit_, uint256 epoch_);
 
     /* ========== MODIFIERS ========== */
 
@@ -105,8 +106,6 @@ contract sCoachAI is IsCADT, ERC20Permit {
 
         emit Transfer(address(0x0), stakingContract, _totalSupply);
         emit LogStakingContractUpdated(stakingContract);
-
-        initializer = address(0);
     }
 
     /* ========== REBASE ========== */
@@ -119,6 +118,8 @@ contract sCoachAI is IsCADT, ERC20Permit {
     function rebase(uint256 profit_, uint256 epoch_) public override onlyStakingContract returns (uint256) {
         uint256 rebaseAmount;
         uint256 circulatingSupply_ = circulatingSupply();
+        emit LogRebaseCall(profit_, epoch_);
+
         if (profit_ == 0) {
             emit LogSupply(epoch_, _totalSupply);
             emit LogRebase(epoch_, 0, index());

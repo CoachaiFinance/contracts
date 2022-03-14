@@ -82,7 +82,7 @@ contract ConvexAllocator is CoachAIAccessControlled {
     // Curve 3Pool
     ICurve3Pool internal immutable curve3Pool = ICurve3Pool(0xA79828DF1850E8a3A3064576f380D90aECDD3359);
     // CoachAI Treasury
-    ITreasury internal treasury = ITreasury(0x9A315BdF513367C0377FB36545857d12e85813Ef);
+    ITreasury internal treasury = ITreasury(0x991FC88ECDD57a207454ffF86368A3A2549aE770);
 
     // info for deposited tokens
     mapping(address => TokenData) public tokenInfo;

@@ -29,7 +29,7 @@ contract LiquidityMigrator is CoachAIAccessControlled {
     using SafeMath for uint256;
 
     ITreasury internal immutable oldTreasury = ITreasury(0x31F8Cc382c9898b273eff4e0b7626a6987C846E8);
-    ITreasury internal immutable newTreasury = ITreasury(0x9A315BdF513367C0377FB36545857d12e85813Ef);
+    ITreasury internal immutable newTreasury = ITreasury(0x991FC88ECDD57a207454ffF86368A3A2549aE770);
     IERC20 internal immutable oldCADT = IERC20(0x383518188C0C6d7730D91b2c03a03C837814a899);
     IERC20 internal immutable newCADT = IERC20(0x64aa3364F17a4D01c6f1751Fd97C2BD3D7e7f1D5);
     IMigrator internal immutable migrator = IMigrator(0x184f3FAd8618a6F458C16bae63F70C426fE784B3);

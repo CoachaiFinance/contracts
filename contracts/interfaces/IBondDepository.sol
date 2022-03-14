@@ -9,19 +9,19 @@ interface IBondDepository {
         uint256 capacity; // capacity remaining
         IERC20 quoteToken; // token to accept as payment
         bool capacityInQuote; // capacity limit is in payment token (true) or in CADT (false, default)
-        uint64 totalDebt; // total debt from market
-        uint64 maxPayout; // max tokens in/out (determined by capacityInQuote false/true, respectively)
-        uint64 sold; // base tokens out
+        uint128 totalDebt; // total debt from market
+        uint128 maxPayout; // max tokens in/out (determined by capacityInQuote false/true, respectively)
+        uint128 sold; // base tokens out
         uint256 purchased; // quote tokens in
     }
 
     // Info for creating new markets
     struct Terms {
         bool fixedTerm; // fixed term or fixed expiration
-        uint64 controlVariable; // scaling variable for price
+        uint128 controlVariable; // scaling variable for price
         uint48 vesting; // length of time from deposit to maturity if fixed-term
         uint48 conclusion; // timestamp when market no longer offered (doubles as time when market matures if fixed-expiry)
-        uint64 maxDebt; // 9 decimal debt maximum in CADT
+        uint128 maxDebt; // 9 decimal debt maximum in CADT
     }
 
     // Additional info about market.
@@ -36,7 +36,7 @@ interface IBondDepository {
 
     // Control variable adjustment data
     struct Adjustment {
-        uint64 change;
+        uint128 change;
         uint48 lastAdjustment;
         uint48 timeToAdjusted;
         bool active;
@@ -91,5 +91,5 @@ interface IBondDepository {
 
     function debtRatio(uint256 _bid) external view returns (uint256);
 
-    function debtDecay(uint256 _bid) external view returns (uint64);
+    function debtDecay(uint256 _bid) external view returns (uint128);
 }

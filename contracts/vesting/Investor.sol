@@ -49,7 +49,7 @@ contract InvestorClaimV2 is Ownable {
     // payment token
     IERC20 internal immutable dai = IERC20(0x6B175474E89094C44Da98b954EedeAC495271d0F);
     // mints claim token
-    ITreasury internal immutable treasury = ITreasury(0x9A315BdF513367C0377FB36545857d12e85813Ef);
+    ITreasury internal immutable treasury = ITreasury(0x991FC88ECDD57a207454ffF86368A3A2549aE770);
     // stake CADT for sCADT
     IStaking internal immutable staking = IStaking(0xB63cac384247597756545b500253ff8E607a8020);
     // holds non-circulating supply
